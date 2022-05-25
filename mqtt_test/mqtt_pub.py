@@ -14,12 +14,11 @@ while True:
         # client.publish("test_topic", random.randint(25, 35))
         client.publish("temperature/location_one", 22)
         client.publish("temperature/location_two", 23)
-        client.publish("temperature/location_three", 24)
-        client.publish("temperature/location_four", 25)
-
 
         client.publish("humidity/location_one", random.randint(25, 35))
         client.publish("humidity/location_two", random.randint(25, 35))
-        client.publish("humidity/location_three", random.randint(25, 35))
-        client.publish("humidity/location_four", random.randint(25, 35))
+
+        client.publish("humidity/location_one", random.randint(25, 35))
+        client.publish("humidity/location_two", random.randint(25, 35))
+        
         prev_time = time.time()
