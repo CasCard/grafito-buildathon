@@ -5,11 +5,21 @@ import time
 import random
 
 client = mqtt.Client("test_client_pub")
-client.connect("localhost")
+client.connect("192.168.199.142")
 
 # send temperature data for every 0.1 seconds
 prev_time = time.time()
 while True:
     if (time.time() - prev_time) > 1:
-        client.publish("test_topic", random.randint(25, 35))
+        # client.publish("test_topic", random.randint(25, 35))
+        client.publish("temperature/location_one", 22)
+        client.publish("temperature/location_two", 23)
+        client.publish("temperature/location_three", 24)
+        client.publish("temperature/location_four", 25)
+
+
+        client.publish("humidity/location_one", random.randint(25, 35))
+        client.publish("humidity/location_two", random.randint(25, 35))
+        client.publish("humidity/location_three", random.randint(25, 35))
+        client.publish("humidity/location_four", random.randint(25, 35))
         prev_time = time.time()
