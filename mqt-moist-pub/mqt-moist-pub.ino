@@ -1,83 +1,126 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-const char* ssid ="Function2"; //replace this with your wifi  name
-const char* password ="Function"; //replace with your wifi password
-char hostname[] ="192.168.199.142"; //replace this with IP address of machine 
-//on which broker is installed
-#define TOKEN "bytesofgigabytes"
+// Update these with values suitable for your network.
 
-int sense_Pin = 0; // sensor input at Analog pin A0
+const char* ssid = "Function2";
+const char* password = "Function";
+const char* mqtt_server = "192.168.199.142";
 
-int value = 0;
+WiFiClient espClient;
+PubSubClient client(espClient);
 
-WiFiClient wifiClient;
-PubSubClient client(wifiClient);
+unsigned long lastMsg = 0;
+#define MSG_BUFFER_SIZE (50)
+char msg[MSG_BUFFER_SIZE];
+float value = 0;
 
-int status = WL_IDLE_STATUS;
-
-void setup()
+void setup_wifi()
 {
-  Serial.begin(115200);
+
+  delay(10);
+  // We start by connecting to a WiFi network
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-  
-  while (WiFi.status() != WL_CONNECTED) {
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("Connected to WiFi");
-  Serial.println("ESP8266 AS PUBLISHER");
-  client.setServer(hostname, 1883 ); //default port for mqtt is 1883
+
+//  randomSeed(micros());
+
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
+void callback(char *topic, byte *payload, unsigned int length)
+{
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  for (int i = 0; i < length; i++)
+  {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
+
+  // Switch on the LED if an 1 was received as first character
+  if ((char)payload[0] == '1')
+  {
+    digitalWrite(BUILTIN_LED, LOW); // Turn the LED on (Note that LOW is the voltage level
+    // but actually the LED is on; this is because
+    // it is active low on the ESP-01)
+  }
+  else
+  {
+    digitalWrite(BUILTIN_LED, HIGH); // Turn the LED off by making the voltage HIGH
+  }
+}
+
+void reconnect()
+{
+  // Loop until we're reconnected
+  while (!client.connected())
+  {
+    Serial.print("Attempting MQTT connection...");
+    // Create a random client ID
+    String clientId = "ESP8266Client-";
+    clientId += String(random(0xffff), HEX);
+    // Attempt to connect
+    if (client.connect(clientId.c_str()))
+    {
+      Serial.println("connected");
+      // Once connected, publish an announcement...
+      client.publish("outTopic", "hello world");
+      // ... and resubscribe
+      client.subscribe("inTopic");
+    }
+    else
+    {
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+      Serial.println(" try again in 5 seconds");
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
+  }
+}
+
+void setup()
+{
+  pinMode(BUILTIN_LED, OUTPUT); // Initialize the BUILTIN_LED pin as an output
+  Serial.begin(115200);
+  setup_wifi();
+  client.setServer(mqtt_server, 1883);
+  client.setCallback(callback);
 }
 
 void loop()
 {
-  if ( !client.connected() )
-  {
-  reconnect();
-  }
-  MQTTPOST();
-  delay(5000);//delay 5 Sec
-}
 
-void MQTTPOST()
-{
-  value= analogRead(sense_Pin);
-  value= value/10;
-  //payload formation begins here
-  String payload ="{";
-  payload +="\"Temp\":"; payload +=10; payload +=",";
-  payload +="\"Humi\":"; payload +=20;
-  payload +="}";
-  
-  char attributes[1000];
-  payload.toCharArray( attributes, 1000 );
-  client.publish("test", attributes); //topic="test" MQTT data post command.
-  Serial.println( attributes );
-}
-//this function helps you reconnect wifi as well as broker if connection gets disconnected.
-void reconnect() 
-{
-while (!client.connected()) {
-  status = WiFi.status();
-  if ( status != WL_CONNECTED) {
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-      Serial.print(".");
-    }
-    Serial.println("Connected to AP");
-  }
-  Serial.print("Connecting to Broker …");
-  Serial.print("192.168.199.142");
-  
-  if ( client.connect("ESP8266 Device", TOKEN, NULL) )
+  if (!client.connected())
   {
-    Serial.println("[DONE]" );
+    reconnect();
   }
-  else {
-    Serial.println( " : retrying in 5 seconds]" );
-    delay( 5000 );
+  client.loop();
+
+  unsigned long now = millis();
+  if (now - lastMsg > 2000)
+  {
+    value = analogRead(0);
+    value = value / 10;
+    dtostrf(value, 6, 2, msg);
+
+    client.publish("moisture/Kalamassery", msg);
+    lastMsg = now;
   }
-  }
+
 }
