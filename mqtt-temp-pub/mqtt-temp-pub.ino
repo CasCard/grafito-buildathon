@@ -139,7 +139,7 @@ void loop()
     client.loop();
 
     unsigned long now = millis();
-    if (now - lastMsg > 2000)
+    if (now - lastMsg > 10000)
     {
         lastMsg = now;
         //    Serial.println("Hi");
@@ -148,9 +148,9 @@ void loop()
         HTTPClient http; // Declare an object of class HTTPClient
 
         // specify request destination
-        http.begin(happy, "http://api.openweathermap.org/data/2.5/weather?q=" + Location + "&APPID=" + API_Key); // !!
-        int httpCode = http.GET();                                                                               // send the request
-        if (httpCode > 0)                                                                                        // check the returning code
+        http.begin(happy, "http://api.openweathermap.org/data/2.5/weather?q=Kochi,IN&APPID=9f385b5cd968cedd56522634f74eb068"); // !!
+        int httpCode = http.GET();                                                                                             // send the request
+        if (httpCode > 0)                                                                                                      // check the returning code
         {
             String payload = http.getString(); // Get the request response payload
 
@@ -172,6 +172,84 @@ void loop()
             client.publish("temperature/Kochi", msg);
             dtostrf(humidity, 6, 2, msg);
             client.publish("humidity/Kochi", msg);
+        }
+
+        http.begin(happy, "http://api.openweathermap.org/data/2.5/weather?q=Edappally,IN&APPID=9f385b5cd968cedd56522634f74eb068"); // !!
+        httpCode = http.GET();                                                                                                     // send the request
+        if (httpCode > 0)                                                                                                          // check the returning code
+        {
+            String payload = http.getString(); // Get the request response payload
+
+            DynamicJsonBuffer jsonBuffer(512);
+
+            // Parse JSON object
+            JsonObject &root = jsonBuffer.parseObject(payload);
+            if (!root.success())
+            {
+                Serial.println(F("Parsing failed!"));
+                return;
+            }
+
+            float temp = (float)(root["main"]["temp"]) - 273.15; // get temperature in °C
+            float humidity = (float)root["main"]["humidity"];    // get humidity in %
+
+            dtostrf(temp, 6, 2, msg);
+
+            client.publish("temperature/Edappally", msg);
+            dtostrf(humidity, 6, 2, msg);
+            client.publish("humidity/Edappally", msg);
+        }
+
+        http.begin(happy, "http://api.openweathermap.org/data/2.5/weather?q=Aluva,IN&APPID=9f385b5cd968cedd56522634f74eb068"); // !!
+        httpCode = http.GET();                                                                                                 // send the request
+        if (httpCode > 0)                                                                                                      // check the returning code
+        {
+            String payload = http.getString(); // Get the request response payload
+
+            DynamicJsonBuffer jsonBuffer(512);
+
+            // Parse JSON object
+            JsonObject &root = jsonBuffer.parseObject(payload);
+            if (!root.success())
+            {
+                Serial.println(F("Parsing failed!"));
+                return;
+            }
+
+            float temp = (float)(root["main"]["temp"]) - 273.15; // get temperature in °C
+            float humidity = (float)root["main"]["humidity"];    // get humidity in %
+
+            dtostrf(temp, 6, 2, msg);
+
+            client.publish("temperature/Aluva", msg);
+            dtostrf(humidity, 6, 2, msg);
+            client.publish("humidity/Aluva", msg);
+        }
+
+        http.begin(happy, "http://api.openweathermap.org/data/2.5/weather?q=Kalamassery,IN&APPID=9f385b5cd968cedd56522634f74eb068"); // !!
+        httpCode = http.GET();                                                                                                       // send the request
+        if (httpCode > 0)                                                                                                            // check the returning code
+        {
+            String payload = http.getString(); // Get the request response payload
+
+            DynamicJsonBuffer jsonBuffer(512);
+
+            // Parse JSON object
+            JsonObject &root = jsonBuffer.parseObject(payload);
+            if (!root.success())
+            {
+                Serial.println(F("Parsing failed!"));
+                return;
+            }
+
+            float temp = (float)(root["main"]["temp"]) - 273.15; // get temperature in °C
+            float humidity = (float)root["main"]["humidity"];    // get humidity in %
+
+            dtostrf(temp, 6, 2, msg);
+
+            client.publish("temperature/Kalamassery", msg);
+            dtostrf(humidity, 6, 2, msg);
+            client.publish("humidity/Kalamassery", msg);
         }
     }
 }

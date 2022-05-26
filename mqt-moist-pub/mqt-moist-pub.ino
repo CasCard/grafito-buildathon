@@ -3,9 +3,9 @@
 
 // Update these with values suitable for your network.
 
-const char* ssid = "Function2";
-const char* password = "Function";
-const char* mqtt_server = "192.168.199.142";
+const char *ssid = "Function2";
+const char *password = "Function";
+const char *mqtt_server = "192.168.199.142";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -33,7 +33,7 @@ void setup_wifi()
     Serial.print(".");
   }
 
-//  randomSeed(micros());
+  //  randomSeed(micros());
 
   Serial.println("");
   Serial.println("WiFi connected");
@@ -115,12 +115,10 @@ void loop()
   unsigned long now = millis();
   if (now - lastMsg > 2000)
   {
-    value = analogRead(0);
-    value = value / 10;
+    value = 100.00 - ((analogRead(sensor_pin) / 1024.00) * 100.00);
     dtostrf(value, 6, 2, msg);
 
     client.publish("moisture/Kalamassery", msg);
     lastMsg = now;
   }
-
 }
