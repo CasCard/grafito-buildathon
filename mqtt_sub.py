@@ -26,9 +26,12 @@ class MQTTSub:
         self.Soil_moisture = float(message.payload.decode("utf-8"))
 
     def on_message_all(self, client, userdata, message):
-        out_flowrate = self.fuzzy.get_output(
-            self.Soil_moisture/6, self.humidity/4, self.temp/2, 5)
-        self.client.publish("out_flowrate", out_flowrate)
+        try:
+            out_flowrate = self.fuzzy.get_output(
+                self.Soil_moisture, self.humidity/4, self.temp/2, 7)
+            self.client.publish("out_flowrate", out_flowrate)
+        except:
+            pass
 
     def on_message_temp(self, client, userdata, message):
         new_temp = float(message.payload.decode("utf-8"))
