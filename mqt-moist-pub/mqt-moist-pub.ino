@@ -11,7 +11,7 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 unsigned long lastMsg = 0;
-#define MSG_BUFFER_SIZE (50)
+#define MSG_BUFFER_SIZE(50)
 char msg[MSG_BUFFER_SIZE];
 float value = 0;
 
